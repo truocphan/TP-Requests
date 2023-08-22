@@ -1,6 +1,7 @@
-import re, json_duplicate_keys as jdks, socket, ssl, copy, uuid
+import json_duplicate_keys as jdks, socket, ssl, copy, uuid
 from collections import OrderedDict
 from urllib.parse import urlparse
+from TP_HTTP_Request_Response_Parser import *
 
 class TP_HTTP_REQUEST:
 	def __init__(self, PathParams=dict(), QueryParams=dict(), URIFragment=str(), HTTPVersion="HTTP/1.1", HTTPHeaders=dict(), BodyJson=None, BodyData=dict(), BodyFiles=dict(), BodyContent=str(), dupSign_start="{{{", dupSign_end="}}}", separator="||", parse_index="$", _isDebug_=False):
@@ -11,7 +12,7 @@ class TP_HTTP_REQUEST:
 		self.___isDebug_ = _isDebug_ if type(_isDebug_) == bool else False
 
 		# TP_HTTP_REQUEST version
-		self.__version = "2023.8.19"
+		self.__version = "2023.8.20"
 
 		# Body content type
 		self.__BodyType = None
@@ -24,11 +25,11 @@ class TP_HTTP_REQUEST:
 			...
 		}
 		"""
-		self.__PathParams = jdks.JSON_DUPLICATE_KEYS({})
+		self.__PathParams = copy.deepcopy(jdks.JSON_DUPLICATE_KEYS({}))
 		if type(PathParams) in [dict, OrderedDict]:
-			self.__PathParams = jdks.JSON_DUPLICATE_KEYS(PathParams)
+			self.__PathParams = copy.deepcopy(jdks.JSON_DUPLICATE_KEYS(PathParams))
 		elif type(PathParams) == jdks.JSON_DUPLICATE_KEYS:
-			self.__PathParams = PathParams
+			self.__PathParams = copy.deepcopy(PathParams)
 
 		# initialization QueryParams
 		"""
@@ -38,11 +39,11 @@ class TP_HTTP_REQUEST:
 			...
 		}
 		"""
-		self.__QueryParams = jdks.JSON_DUPLICATE_KEYS({})
+		self.__QueryParams = copy.deepcopy(jdks.JSON_DUPLICATE_KEYS({}))
 		if type(QueryParams) in [dict, OrderedDict]:
-			self.__QueryParams = jdks.JSON_DUPLICATE_KEYS(QueryParams)
+			self.__QueryParams = copy.deepcopy(jdks.JSON_DUPLICATE_KEYS(QueryParams))
 		elif type(QueryParams) == jdks.JSON_DUPLICATE_KEYS:
-			self.__QueryParams = QueryParams
+			self.__QueryParams = copy.deepcopy(QueryParams)
 
 		# initialization URIFragment
 		"""
@@ -68,16 +69,16 @@ class TP_HTTP_REQUEST:
 			...
 		}
 		"""
-		self.__HTTPHeaders = jdks.JSON_DUPLICATE_KEYS({})
+		self.__HTTPHeaders = copy.deepcopy(jdks.JSON_DUPLICATE_KEYS({}))
 		if type(HTTPHeaders) in [dict, OrderedDict]:
-			self.__HTTPHeaders = jdks.JSON_DUPLICATE_KEYS(HTTPHeaders)
+			self.__HTTPHeaders = copy.deepcopy(jdks.JSON_DUPLICATE_KEYS(HTTPHeaders))
 		elif type(HTTPHeaders) == jdks.JSON_DUPLICATE_KEYS:
-			self.__HTTPHeaders = HTTPHeaders
+			self.__HTTPHeaders = copy.deepcopy(HTTPHeaders)
 
-		if self.__HTTPHeaders.get("User-Agent") == "JSON_DUPLICATE_KEYS_ERROR":
-			self.__HTTPHeaders.set("User-Agent", "TP_Requests (http/TP_HTTP_REQUEST "+self.__version+")")
-		if self.__HTTPHeaders.get("Connection") == "JSON_DUPLICATE_KEYS_ERROR":
-			self.__HTTPHeaders.set("Connection", "close")
+		if self.__HTTPHeaders.get("User-Agent", separator=self.__separator, parse_index=self.__parse_index) == "JSON_DUPLICATE_KEYS_ERROR":
+			self.__HTTPHeaders.set("User-Agent", "TP_Requests (http/TP_HTTP_REQUEST "+self.__version+")", separator=self.__separator, parse_index=self.__parse_index, dupSign_start=self.__dupSign_start, dupSign_end=self.__dupSign_end)
+		if self.__HTTPHeaders.get("Connection", separator=self.__separator, parse_index=self.__parse_index) == "JSON_DUPLICATE_KEYS_ERROR":
+			self.__HTTPHeaders.set("Connection", "close", separator=self.__separator, parse_index=self.__parse_index, dupSign_start=self.__dupSign_start, dupSign_end=self.__dupSign_end)
 
 		# initialization HTTPCookies
 		"""
@@ -87,13 +88,13 @@ class TP_HTTP_REQUEST:
 			...
 		}
 		"""
-		self.__HTTPCookies = jdks.JSON_DUPLICATE_KEYS({})
-		if self.__HTTPHeaders.get("Cookie") != "JSON_DUPLICATE_KEYS_ERROR":
-			for cookie in str(self.__HTTPHeaders.get("Cookie")).split(";"):
+		self.__HTTPCookies = copy.deepcopy(jdks.JSON_DUPLICATE_KEYS({}))
+		if self.__HTTPHeaders.get("Cookie", separator=self.__separator, parse_index=self.__parse_index) != "JSON_DUPLICATE_KEYS_ERROR":
+			for cookie in str(self.__HTTPHeaders.get("Cookie", separator=self.__separator, parse_index=self.__parse_index)).split(";"):
 				if len(cookie.split("=", 1)) == 2:
-					self.__HTTPCookies.set(cookie.split("=", 1)[0].strip(), cookie.split("=", 1)[1].strip())
+					self.__HTTPCookies.set(cookie.split("=", 1)[0].strip(), cookie.split("=", 1)[1].strip(), separator=self.__separator, parse_index=self.__parse_index, dupSign_start=self.__dupSign_start, dupSign_end=self.__dupSign_end)
 				else:
-					self.__HTTPCookies.set(cookie.split("=", 1)[0].strip(), "")
+					self.__HTTPCookies.set(cookie.split("=", 1)[0].strip(), "", separator=self.__separator, parse_index=self.__parse_index, dupSign_start=self.__dupSign_start, dupSign_end=self.__dupSign_end)
 
 		# initialization BodyJson
 		"""
@@ -105,9 +106,9 @@ class TP_HTTP_REQUEST:
 		"""
 		self.__BodyJson = None
 		if type(BodyJson) in [dict, OrderedDict, list]:
-			self.__BodyJson = jdks.JSON_DUPLICATE_KEYS(BodyJson)
+			self.__BodyJson = copy.deepcopy(jdks.JSON_DUPLICATE_KEYS(BodyJson))
 		elif type(BodyJson) == jdks.JSON_DUPLICATE_KEYS:
-			self.__BodyJson = BodyJson
+			self.__BodyJson = copy.deepcopy(BodyJson)
 
 		# initialization BodyData
 		"""
@@ -117,11 +118,11 @@ class TP_HTTP_REQUEST:
 			...
 		}
 		"""
-		self.__BodyData = jdks.JSON_DUPLICATE_KEYS({})
+		self.__BodyData = copy.deepcopy(jdks.JSON_DUPLICATE_KEYS({}))
 		if type(BodyData) in [dict, OrderedDict]:
-			self.__BodyData = jdks.JSON_DUPLICATE_KEYS(BodyData)
+			self.__BodyData = copy.deepcopy(jdks.JSON_DUPLICATE_KEYS(BodyData))
 		elif type(BodyData) == jdks.JSON_DUPLICATE_KEYS:
-			self.__BodyData = BodyData
+			self.__BodyData = copy.deepcopy(BodyData)
 
 		# initialization BodyFiles
 		"""
@@ -147,11 +148,11 @@ class TP_HTTP_REQUEST:
 			...
 		}
 		"""
-		self.__BodyFiles = jdks.JSON_DUPLICATE_KEYS({})
+		self.__BodyFiles = copy.deepcopy(jdks.JSON_DUPLICATE_KEYS({}))
 		if type(BodyFiles) in [dict, OrderedDict]:
-			self.__BodyFiles = jdks.JSON_DUPLICATE_KEYS(BodyFiles)
+			self.__BodyFiles = copy.deepcopy(jdks.JSON_DUPLICATE_KEYS(BodyFiles))
 		elif type(BodyFiles) == jdks.JSON_DUPLICATE_KEYS:
-			self.__BodyFiles = BodyFiles
+			self.__BodyFiles = copy.deepcopy(BodyFiles)
 
 		# initialization BodyContent
 		"""
@@ -165,13 +166,12 @@ class TP_HTTP_REQUEST:
 		self.__HTTPRequestsResponses = list()
 
 
-
 	# READ PathParams
 	def get_path_params(self):
 		if type(self.__PathParams) == jdks.JSON_DUPLICATE_KEYS:
 			return self.__PathParams
 		else:
-			self.__PathParams = jdks.JSON_DUPLICATE_KEYS({})
+			self.__PathParams = copy.deepcopy(jdks.JSON_DUPLICATE_KEYS({}))
 			return self.__PathParams
 
 	def get_path_param(self, name):
@@ -183,7 +183,7 @@ class TP_HTTP_REQUEST:
 		if type(self.__QueryParams) == jdks.JSON_DUPLICATE_KEYS:
 			return self.__QueryParams
 		else:
-			self.__QueryParams = jdks.JSON_DUPLICATE_KEYS({})
+			self.__QueryParams = copy.deepcopy(jdks.JSON_DUPLICATE_KEYS({}))
 			return self.__QueryParams
 
 	def get_query_param(self, name):
@@ -213,7 +213,7 @@ class TP_HTTP_REQUEST:
 		if type(self.__HTTPHeaders) == jdks.JSON_DUPLICATE_KEYS:
 			return self.__HTTPHeaders
 		else:
-			self.__HTTPHeaders = jdks.JSON_DUPLICATE_KEYS({})
+			self.__HTTPHeaders = copy.deepcopy(jdks.JSON_DUPLICATE_KEYS({}))
 			return self.__HTTPHeaders
 
 	def get_http_header(self, name):
@@ -225,7 +225,7 @@ class TP_HTTP_REQUEST:
 		if type(self.__HTTPCookies) == jdks.JSON_DUPLICATE_KEYS:
 			return self.__HTTPCookies
 		else:
-			self.__HTTPCookies = jdks.JSON_DUPLICATE_KEYS({})
+			self.__HTTPCookies = copy.deepcopy(jdks.JSON_DUPLICATE_KEYS({}))
 			return self.__HTTPCookies
 
 	def get_http_cookie(self, name):
@@ -241,9 +241,9 @@ class TP_HTTP_REQUEST:
 			return self.__BodyJson
 
 	def get_body_json_param(self, name):
-		if type(self.get_body_json_params()) != None:
+		if type(self.get_body_json_params()) == jdks.JSON_DUPLICATE_KEYS:
 			return self.get_body_json_params().get(name, separator=self.__separator, parse_index=self.__parse_index, _isDebug_=self.___isDebug_)
-		return None
+		return "JSON_DUPLICATE_KEYS_ERROR"
 
 
 	# READ BodyData
@@ -251,7 +251,7 @@ class TP_HTTP_REQUEST:
 		if type(self.__BodyData) == jdks.JSON_DUPLICATE_KEYS:
 			return self.__BodyData
 		else:
-			self.__BodyData = jdks.JSON_DUPLICATE_KEYS({})
+			self.__BodyData = copy.deepcopy(jdks.JSON_DUPLICATE_KEYS({}))
 			return self.__BodyData
 
 	def get_body_data_param(self, name):
@@ -260,23 +260,23 @@ class TP_HTTP_REQUEST:
 
 	# READ BodyFiles
 	def get_body_files_params(self):
-		JDKSObject = jdks.JSON_DUPLICATE_KEYS({})
+		JDKSObject = copy.deepcopy(jdks.JSON_DUPLICATE_KEYS({}))
 
 		if type(self.__BodyFiles) == jdks.JSON_DUPLICATE_KEYS:
 			for name in self.__BodyFiles.getObject():
 				JDKSObject.set(name, dict(), separator=self.__separator, parse_index=self.__parse_index, dupSign_start=self.__dupSign_start, dupSign_end=self.__dupSign_end, _isDebug_=self.___isDebug_)
 				if type(self.__BodyFiles.get(name, separator=self.__separator, parse_index=self.__parse_index, _isDebug_=self.___isDebug_)) in [dict, OrderedDict]:
-					if self.__BodyFiles.get(self.__separator.join(name,"filename"), separator=self.__separator, parse_index=self.__parse_index, _isDebug_=self.___isDebug_) != "JSON_DUPLICATE_KEYS_ERROR":
-						JDKSObject.set(self.__separator.join(name,"filename"), self.__BodyFiles.get(self.__separator.join(name,"filename"), separator=self.__separator, parse_index=self.__parse_index, _isDebug_=self.___isDebug_), separator=self.__separator, parse_index=self.__parse_index, dupSign_start=self.__dupSign_start, dupSign_end=self.__dupSign_end, _isDebug_=self.___isDebug_)
+					if self.__BodyFiles.get(self.__separator.join([name,"filename"]), separator=self.__separator, parse_index=self.__parse_index, _isDebug_=self.___isDebug_) != "JSON_DUPLICATE_KEYS_ERROR":
+						JDKSObject.set(self.__separator.join([name,"filename"]), self.__BodyFiles.get(self.__separator.join([name,"filename"]), separator=self.__separator, parse_index=self.__parse_index), separator=self.__separator, parse_index=self.__parse_index, dupSign_start=self.__dupSign_start, dupSign_end=self.__dupSign_end, _isDebug_=self.___isDebug_)
 
-					if self.__BodyFiles.get(self.__separator.join(name,"headers"), separator=self.__separator, parse_index=self.__parse_index, _isDebug_=self.___isDebug_) != "JSON_DUPLICATE_KEYS_ERROR":
-						JDKSObject.set(self.__separator.join(name,"headers"), dict(), separator=self.__separator, parse_index=self.__parse_index, dupSign_start=self.__dupSign_start, dupSign_end=self.__dupSign_end, _isDebug_=self.___isDebug_)
-						if type(self.__BodyFiles.get(self.__separator.join(name,"headers"), separator=self.__separator, parse_index=self.__parse_index, _isDebug_=self.___isDebug_)) in [dict, OrderedDict]:
-							for h in self.__BodyFiles.get(self.__separator.join(name,"headers"), separator=self.__separator, parse_index=self.__parse_index, _isDebug_=self.___isDebug_):
-								JDKSObject.set(self.__separator.join(name,"headers",h), self.__BodyFiles.get(self.__separator.join(name,"headers",h), separator=self.__separator, parse_index=self.__parse_index, _isDebug_=self.___isDebug_), separator=self.__separator, parse_index=self.__parse_index, dupSign_start=self.__dupSign_start, dupSign_end=self.__dupSign_end, _isDebug_=self.___isDebug_)
+					if self.__BodyFiles.get(self.__separator.join([name,"headers"]), separator=self.__separator, parse_index=self.__parse_index, _isDebug_=self.___isDebug_) != "JSON_DUPLICATE_KEYS_ERROR":
+						JDKSObject.set(self.__separator.join([name,"headers"]), dict(), separator=self.__separator, parse_index=self.__parse_index, dupSign_start=self.__dupSign_start, dupSign_end=self.__dupSign_end, _isDebug_=self.___isDebug_)
+						if type(self.__BodyFiles.get(self.__separator.join([name,"headers"]), separator=self.__separator, parse_index=self.__parse_index)) in [dict, OrderedDict]:
+							for h in self.__BodyFiles.get(self.__separator.join([name,"headers"]), separator=self.__separator, parse_index=self.__parse_index):
+								JDKSObject.set(self.__separator.join([name,"headers",h]), self.__BodyFiles.get(self.__separator.join([name,"headers",h]), separator=self.__separator, parse_index=self.__parse_index, _isDebug_=self.___isDebug_), separator=self.__separator, parse_index=self.__parse_index, dupSign_start=self.__dupSign_start, dupSign_end=self.__dupSign_end, _isDebug_=self.___isDebug_)
 
-					if self.__BodyFiles.get(self.__separator.join(name,"value"), separator=self.__separator, parse_index=self.__parse_index, _isDebug_=self.___isDebug_) != "JSON_DUPLICATE_KEYS_ERROR":
-						JDKSObject.set(self.__separator.join(name,"value"), self.__BodyFiles.get(self.__separator.join(name,"value"), separator=self.__separator, parse_index=self.__parse_index, _isDebug_=self.___isDebug_), separator=self.__separator, parse_index=self.__parse_index, dupSign_start=self.__dupSign_start, dupSign_end=self.__dupSign_end, _isDebug_=self.___isDebug_)
+					if self.__BodyFiles.get(self.__separator.join([name,"value"]), separator=self.__separator, parse_index=self.__parse_index, _isDebug_=self.___isDebug_) != "JSON_DUPLICATE_KEYS_ERROR":
+						JDKSObject.set(self.__separator.join([name,"value"]), self.__BodyFiles.get(self.__separator.join([name,"value"]), separator=self.__separator, parse_index=self.__parse_index), separator=self.__separator, parse_index=self.__parse_index, dupSign_start=self.__dupSign_start, dupSign_end=self.__dupSign_end, _isDebug_=self.___isDebug_)
 
 		self.__BodyFiles = JDKSObject
 		return JDKSObject
@@ -357,7 +357,7 @@ class TP_HTTP_REQUEST:
 	def set_http_header(self, name, value):
 		self.get_http_headers().set(name, value, separator=self.__separator, parse_index=self.__parse_index, dupSign_start=self.__dupSign_start, dupSign_end=self.__dupSign_end, _isDebug_=self.___isDebug_)
 		if name == "Cookie":
-			self.__HTTPCookies = jdks.JSON_DUPLICATE_KEYS({})
+			self.__HTTPCookies = copy.deepcopy(jdks.JSON_DUPLICATE_KEYS({}))
 			if self.__HTTPHeaders.get("Cookie", separator=self.__separator, parse_index=self.__parse_index, _isDebug_=self.___isDebug_) != "JSON_DUPLICATE_KEYS_ERROR":
 				for cookie in str(self.__HTTPHeaders.get("Cookie", separator=self.__separator, parse_index=self.__parse_index)).split(";"):
 					if len(cookie.split("=", 1)) == 2:
@@ -374,7 +374,7 @@ class TP_HTTP_REQUEST:
 	def update_http_header(self, name, value):
 		self.get_http_headers().update(name, value, separator=self.__separator, parse_index=self.__parse_index, _isDebug_=self.___isDebug_)
 		if name == "Cookie":
-			self.__HTTPCookies = jdks.JSON_DUPLICATE_KEYS({})
+			self.__HTTPCookies = copy.deepcopy(jdks.JSON_DUPLICATE_KEYS({}))
 			if self.__HTTPHeaders.get("Cookie", separator=self.__separator, parse_index=self.__parse_index, _isDebug_=self.___isDebug_) != "JSON_DUPLICATE_KEYS_ERROR":
 				for cookie in str(self.__HTTPHeaders.get("Cookie", separator=self.__separator, parse_index=self.__parse_index)).split(";"):
 					if len(cookie.split("=", 1)) == 2:
@@ -392,7 +392,7 @@ class TP_HTTP_REQUEST:
 	def set_http_cookie(self, name, value):
 		self.get_http_cookies().set(name, value, separator=self.__separator, parse_index=self.__parse_index, dupSign_start=self.__dupSign_start, dupSign_end=self.__dupSign_end, _isDebug_=self.___isDebug_)
 
-		if self.get_http_headers().get("Cookie", separator=self.__separator, parse_index=self.__parse_index, _isDebug_=self.___isDebug_) == "JSON_DUPLICATE_KEYS_ERROR":
+		if self.get_http_headers().get("Cookie", separator=self.__separator, parse_index=self.__parse_index) == "JSON_DUPLICATE_KEYS_ERROR":
 			self.get_http_headers().set("Cookie", "; ".join([jdks.normalize_key(cname, dupSign_start=self.__dupSign_start, dupSign_end=self.__dupSign_end)+"="+self.get_http_cookies().get(cname, separator=self.__separator, parse_index=self.__parse_index, _isDebug_=self.___isDebug_) for cname in self.get_http_cookies().getObject()]), separator=self.__separator, parse_index=self.__parse_index, dupSign_start=self.__dupSign_start, dupSign_end=self.__dupSign_end, _isDebug_=self.___isDebug_)
 		else:
 			self.get_http_headers().update("Cookie", "; ".join([jdks.normalize_key(cname, dupSign_start=self.__dupSign_start, dupSign_end=self.__dupSign_end)+"="+self.get_http_cookies().get(cname, separator=self.__separator, parse_index=self.__parse_index, _isDebug_=self.___isDebug_) for cname in self.get_http_cookies().getObject()]), separator=self.__separator, parse_index=self.__parse_index, _isDebug_=self.___isDebug_)
@@ -416,8 +416,9 @@ class TP_HTTP_REQUEST:
 
 	# CREATE BodyJson
 	def set_body_json_param(self, name, value):
-		if self.get_body_json_params() == None:
-			self.__BodyJson = jdks.JSON_DUPLICATE_KEYS({})
+		if type(self.get_body_json_params()) != jdks.JSON_DUPLICATE_KEYS:
+			self.__BodyJson = copy.deepcopy(jdks.JSON_DUPLICATE_KEYS({}))
+
 		self.get_body_json_params().set(name, value, separator=self.__separator, parse_index=self.__parse_index, dupSign_start=self.__dupSign_start, dupSign_end=self.__dupSign_end, _isDebug_=self.___isDebug_)
 
 	def set_body_json_params(self, BodyJsonObj):
@@ -481,7 +482,7 @@ class TP_HTTP_REQUEST:
 
 	# DELETE PathParams
 	def delete_path_params(self):
-		self.__PathParams = jdks.JSON_DUPLICATE_KEYS({})
+		self.__PathParams = copy.deepcopy(jdks.JSON_DUPLICATE_KEYS({}))
 
 	def delete_path_param(self, PathParamsList):
 		for name in PathParamsList:
@@ -490,7 +491,7 @@ class TP_HTTP_REQUEST:
 
 	# DELETE QueryParams
 	def delete_query_params(self):
-		self.__QueryParams = jdks.JSON_DUPLICATE_KEYS({})
+		self.__QueryParams = copy.deepcopy(jdks.JSON_DUPLICATE_KEYS({}))
 
 	def delete_query_param(self, QueryParamsList):
 		for name in QueryParamsList:
@@ -509,20 +510,20 @@ class TP_HTTP_REQUEST:
 
 	# DELETE HTTPHeaders
 	def delete_http_headers(self):
-		self.__HTTPHeaders = jdks.JSON_DUPLICATE_KEYS({})
-		self.__HTTPCookies = jdks.JSON_DUPLICATE_KEYS({})
+		self.__HTTPHeaders = copy.deepcopy(jdks.JSON_DUPLICATE_KEYS({}))
+		self.__HTTPCookies = copy.deepcopy(jdks.JSON_DUPLICATE_KEYS({}))
 
 	def delete_http_header(self, HTTPHeadersList):
 		for name in HTTPHeadersList:
 			self.get_http_headers().delete(name, separator=self.__separator, parse_index=self.__parse_index, _isDebug_=self.___isDebug_)
 
 			if name == "Cookie":
-				self.__HTTPCookies = jdks.JSON_DUPLICATE_KEYS({})
+				self.__HTTPCookies = copy.deepcopy(jdks.JSON_DUPLICATE_KEYS({}))
 
 
 	# DELETE HTTPCookies
 	def delete_http_cookies(self):
-		self.__HTTPCookies = jdks.JSON_DUPLICATE_KEYS({})
+		self.__HTTPCookies = copy.deepcopy(jdks.JSON_DUPLICATE_KEYS({}))
 		self.get_http_headers().delete("Cookie", separator=self.__separator, parse_index=self.__parse_index)
 
 	def delete_http_cookie(self, HTTPCookiesList):
@@ -538,14 +539,16 @@ class TP_HTTP_REQUEST:
 		self.__BodyJson = None
 
 	def delete_body_json_param(self, BodyJsonList):
-		if type(self.get_body_json_params()) != None:
+		if type(self.get_body_json_params()) == jdks.JSON_DUPLICATE_KEYS:
 			for name in BodyJsonList:
 				self.get_body_json_params().delete(name, separator=self.__separator, parse_index=self.__parse_index, _isDebug_=self.___isDebug_)
+		else:
+			self.__BodyJson = None
 
 
 	# DELETE BodyData
 	def delete_body_data_params(self):
-		self.__BodyData = jdks.JSON_DUPLICATE_KEYS({})
+		self.__BodyData = copy.deepcopy(jdks.JSON_DUPLICATE_KEYS({}))
 
 	def delete_body_data_param(self, BodyDataList):
 		for name in BodyDataList:
@@ -554,7 +557,7 @@ class TP_HTTP_REQUEST:
 
 	# DELETE BodyFiles
 	def delete_body_files_params(self):
-		self.__BodyFiles = jdks.JSON_DUPLICATE_KEYS({})
+		self.__BodyFiles = copy.deepcopy(jdks.JSON_DUPLICATE_KEYS({}))
 
 	def delete_body_files_param(self, BodyFilesList):
 		for name in BodyFilesList:
@@ -587,7 +590,7 @@ class TP_HTTP_REQUEST:
 				httpReq.update_query_params(injectObj["QueryParams"])
 
 			# Inject URIFragment object
-			if "URIFragment" in injectObj.keys() and len(httpReq.get_uri_fragment()) > 0:
+			if "URIFragment" in injectObj.keys():
 				httpReq.set_uri_fragment(injectObj["URIFragment"])
 
 			# Inject HTTPHeaders object
@@ -611,7 +614,7 @@ class TP_HTTP_REQUEST:
 				httpReq.update_body_files_params(injectObj["BodyFiles"])
 
 			# Inject BodyContent object
-			if "BodyContent" in injectObj.keys() and len(httpReq.get_body_content()) > 0:
+			if "BodyContent" in injectObj.keys():
 				httpReq.set_body_content(injectObj["BodyContent"])
 
 
@@ -630,20 +633,20 @@ class TP_HTTP_REQUEST:
 		if len(rr_path) == 0: rr_path += "/"
 
 		# rr_query
-		rr_query = "?" + "&".join([jdks.normalize_key(name)+"="+httpReq.get_query_param(name) for name in httpReq.get_query_params().getObject()]) if len(httpReq.get_query_params().getObject())>0 else ""
+		rr_query = "?"+"&".join([jdks.normalize_key(name, dupSign_start=self.__dupSign_start, dupSign_end=self.__dupSign_end)+"="+httpReq.get_query_param(name) for name in httpReq.get_query_params().getObject()]) if len(httpReq.get_query_params().getObject())>0 else ""
 
 		# rr_fragment
-		rr_fragment = "#" + httpReq.get_uri_fragment() if len(httpReq.get_uri_fragment())>0 else ""
+		rr_fragment = "#"+httpReq.get_uri_fragment() if len(httpReq.get_uri_fragment())>0 else ""
 
 		# rr_httpversion
 		rr_httpversion = httpReq.get_http_version()
 
 		# rr_body
-		if httpReq.get_body_json_params() != None:
+		if type(httpReq.get_body_json_params()) == jdks.JSON_DUPLICATE_KEYS:
 			rr_body = httpReq.get_body_json_params().dumps()
 			httpReq.__BodyType = "BodyJson"
 		elif len(httpReq.get_body_data_params().getObject()) > 0:
-			rr_body = "&".join([jdks.normalize_key(name)+"="+httpReq.get_body_data_param(name) for name in httpReq.get_body_data_params().getObject()])
+			rr_body = "&".join([jdks.normalize_key(name, dupSign_start=self.__dupSign_start, dupSign_end=self.__dupSign_end)+"="+httpReq.get_body_data_param(name) for name in httpReq.get_body_data_params().getObject()])
 			httpReq.__BodyType = "BodyData"
 		elif len(httpReq.get_body_files_params().getObject()) > 0:
 			boundaryID = "-"*26+uuid.uuid4().hex[-24:]
@@ -651,16 +654,16 @@ class TP_HTTP_REQUEST:
 			for name in httpReq.get_body_files_params().getObject():
 					httpReq.__BodyType = "BodyFiles"
 					rr_body += "--"+boundaryID+"\r\n"
-					rr_body += "Content-Disposition: form-data; name=\""+name+"\""
-					if httpReq.get_body_files_param(httpReq.__separator.join(name,"filename")) != "JSON_DUPLICATE_KEYS_ERROR":
-						rr_body += "; filename=\""+httpReq.get_body_files_param(httpReq.__separator.join(name,"filename"))+"\""
+					rr_body += "Content-Disposition: form-data; name=\""+jdks.normalize_key(name, dupSign_start=self.__dupSign_start, dupSign_end=self.__dupSign_end)+"\""
+					if httpReq.get_body_files_param(httpReq.__separator.join([name,"filename"])) != "JSON_DUPLICATE_KEYS_ERROR":
+						rr_body += "; filename=\""+httpReq.get_body_files_param(httpReq.__separator.join([name,"filename"]))+"\""
 					rr_body += "\r\n"
-					if httpReq.get_body_files_param(httpReq.__separator.join(name,"headers")) != "JSON_DUPLICATE_KEYS_ERROR" and type(httpReq.get_body_files_param(httpReq.__separator.join(name,"headers"))) in [dict, OrderedDict]:
-						for headerName in httpReq.get_body_files_param(httpReq.__separator.join(name,"headers")):
-							rr_body += headerName+": "+str(httpReq.get_body_files_param(httpReq.__separator.join(name,"headers"))[headerName]) + "\r\n"
+					if httpReq.get_body_files_param(httpReq.__separator.join([name,"headers"])) != "JSON_DUPLICATE_KEYS_ERROR" and type(httpReq.get_body_files_param(httpReq.__separator.join([name,"headers"]))) in [dict, OrderedDict]:
+						for headerName in httpReq.get_body_files_param(httpReq.__separator.join([name,"headers"])):
+							rr_body += jdks.normalize_key(headerName, dupSign_start=self.__dupSign_start, dupSign_end=self.__dupSign_end)+": "+httpReq.get_body_files_param(httpReq.__separator.join([name,"headers"]))[headerName] + "\r\n"
 					rr_body += "\r\n"
-					if httpReq.get_body_files_param(httpReq.__separator.join(name,"value")) != "JSON_DUPLICATE_KEYS_ERROR":
-						rr_body += str(httpReq.get_body_files_param(httpReq.__separator.join(name,"value")))
+					if httpReq.get_body_files_param(httpReq.__separator.join([name,"value"])) != "JSON_DUPLICATE_KEYS_ERROR":
+						rr_body += httpReq.get_body_files_param(httpReq.__separator.join([name,"value"]))
 					rr_body += "\r\n"
 
 			if httpReq.__BodyType == "BodyFiles":
@@ -676,39 +679,39 @@ class TP_HTTP_REQUEST:
 		rr_headers = ""
 		if update_content_length:
 			if len(rr_body) > 0:
-				if httpReq.get_http_headers().get("Content-Length") == "JSON_DUPLICATE_KEYS_ERROR":
+				if httpReq.get_http_header("Content-Length") == "JSON_DUPLICATE_KEYS_ERROR":
 					httpReq.set_http_header("Content-Length", len(rr_body))
 				else:
 					httpReq.update_http_header("Content-Length", len(rr_body))
 			elif rr_method in ["POST", "PUT", "PATCH"]:
-				if httpReq.get_http_headers().get("Content-Length") == "JSON_DUPLICATE_KEYS_ERROR":
+				if httpReq.get_http_header("Content-Length") == "JSON_DUPLICATE_KEYS_ERROR":
 					httpReq.set_http_header("Content-Length", 0)
 				else:
 					httpReq.update_http_header("Content-Length", 0)
 
-		if len(rr_body) > 0 and httpReq.get_http_headers().get("Content-Type") == "JSON_DUPLICATE_KEYS_ERROR":
+		if len(rr_body) > 0 and httpReq.get_http_header("Content-Type") == "JSON_DUPLICATE_KEYS_ERROR":
 			if httpReq.__BodyType == "BodyJson":
-				if httpReq.get_http_headers().get("Content-Type") == "JSON_DUPLICATE_KEYS_ERROR":
+				if httpReq.get_http_header("Content-Type") == "JSON_DUPLICATE_KEYS_ERROR":
 					httpReq.set_http_header("Content-Type", "application/json")
 				else:
 					httpReq.update_http_header("Content-Type", "application/json")
 			elif httpReq.__BodyType == "BodyData":
-				if httpReq.get_http_headers().get("Content-Type") == "JSON_DUPLICATE_KEYS_ERROR":
+				if httpReq.get_http_header("Content-Type") == "JSON_DUPLICATE_KEYS_ERROR":
 					httpReq.set_http_header("Content-Type", "application/x-www-form-urlencoded")
 				else:
 					httpReq.update_http_header("Content-Type", "application/x-www-form-urlencoded")
 			elif httpReq.__BodyType == "BodyFiles":
-				if httpReq.get_http_headers().get("Content-Type") == "JSON_DUPLICATE_KEYS_ERROR":
+				if httpReq.get_http_header("Content-Type") == "JSON_DUPLICATE_KEYS_ERROR":
 					httpReq.set_http_header("Content-Type", "multipart/form-data; boundary="+boundaryID)
 				else:
 					httpReq.update_http_header("Content-Type", "multipart/form-data; boundary="+boundaryID)
 			else:
-				if httpReq.get_http_headers().get("Content-Type") == "JSON_DUPLICATE_KEYS_ERROR":
+				if httpReq.get_http_header("Content-Type") == "JSON_DUPLICATE_KEYS_ERROR":
 					httpReq.set_http_header("Content-Type", "application/octet-stream")
 				else:
 					httpReq.update_http_header("Content-Type", "application/octet-stream")
 
-		rr_headers = "\r\n".join([jdks.normalize_key(name)+": "+httpReq.get_http_header(name) for name in httpReq.get_http_headers().getObject()]) if len(httpReq.get_http_headers().getObject())>0 else ""
+		rr_headers = "\r\n".join([jdks.normalize_key(name, dupSign_start=self.__dupSign_start, dupSign_end=self.__dupSign_end)+": "+httpReq.get_http_header(name) for name in httpReq.get_http_headers().getObject()]) if len(httpReq.get_http_headers().getObject())>0 else ""
 		if len(rr_headers) > 0: rr_headers = "\r\n"+rr_headers
 
 
@@ -771,3 +774,5 @@ class TP_HTTP_REQUEST:
 			"request": rawRequest,
 			"response": rawResponse.decode()
 		})
+
+		return TP_HTTP_RESPONSE_PARSER(rawResponse.decode())

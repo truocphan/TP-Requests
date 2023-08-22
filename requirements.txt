@@ -1,1 +1,2 @@
-json-duplicate-keys==2023.8.12
+json-duplicate-keys==2023.8.21
+TP-HTTP-Request-Response-Parser==2023.8.21
