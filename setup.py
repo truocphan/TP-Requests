@@ -11,7 +11,7 @@ setuptools.setup(
 	long_description=open("README.md").read(),
 	long_description_content_type="text/markdown",
 	install_requires=open("requirements.txt").read().split(),
-	url="https://github.com/truocphan/TP_Requests",
+	url="https://github.com/truocphan/TP-Requests",
 	classifiers=[
 		"Programming Language :: Python :: 3",
 		"Programming Language :: Python :: 2",
