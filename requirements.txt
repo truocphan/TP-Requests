@@ -1,1 +1,1 @@
-TP-HTTP-Request-Response-Parser==2023.9.3
+TP-HTTP-Request-Response-Parser>=2024.2.5

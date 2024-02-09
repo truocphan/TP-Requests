@@ -1,0 +1,12 @@
+*
+!/.gitignore
+!/LICENSE
+!/MANIFEST.in
+!/README.md
+!/requirements.txt
+!/SECURITY.md
+!/setup.py
+!/TP_Requests/
+!/TP_Requests/http.py
+!/TP_Requests/mqtt.py
+!/TP_Requests/ws.py
