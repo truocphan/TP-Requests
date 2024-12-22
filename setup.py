@@ -1,8 +1,8 @@
 import setuptools
 
 setuptools.setup(
-	name="TP_Requests",
-	version="2024.2.9",
+	name="TP-Requests",
+	version="2024.12.22",
 	author="TP Cyber Security",
 	license="MIT",
 	author_email="tpcybersec2023@gmail.com",

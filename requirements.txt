@@ -1,1 +1,2 @@
-TP-HTTP-Request-Response-Parser>=2024.2.5
+json-duplicate-keys>=2024.12.12
+TP-HTTP-Request-Response-Parser>=2024.12.22
